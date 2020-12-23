@@ -1,0 +1,19 @@
+{
+    "name": "abhij89/utm-referer",
+    "description": "A simple package to get the referer and utm parameters for a new user",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+	{
+	    "name": "Abhishek jain",
+	    "email": "abhij89@gmail.com"
+	}
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+	"psr-4": {
+	    "Abhij89\\UTMReferer\\": "src/"
+	}
+    },
+    "require": {}
+}
