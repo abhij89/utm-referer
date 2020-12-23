@@ -13,38 +13,43 @@ You can install the package via composer:
 composer require abhij89/utm-referer
 ```
 
-The package will automatically register itself in Laravel 5.5. In Laravel 5.4. you'll manually need to register the `Spatie\Referer\RefererServiceProvider` service provider in `config/app.php`.
+The package will automatically register itself in Laravel 5.5. In Laravel 5.4. you'll manually need to register the `Abhij89\UTMReferer\UTMRefererServiceProvider` service provider in `config/app.php`.
 
 You can publish the config file with:
 
 ```
-php artisan vendor:publish --provider="Spatie\Referer\RefererServiceProvider"
+php artisan vendor:publish --provider="Abhij89\UTMReferer\UTMRefererServiceProvider"
 ```
 
-Publishing the config file is necessary if you want to change the key in which the referer is stored in the session or
-if you want to disable a referer source.
+Publishing the config file is necessary if you want to change the keys in which the referer/utms are stored in the cookie or
+if you want to disable a referer/utm source.
 
 ```php
 return [
 
     /*
-     * The key that will be used to remember the referer in the session.
+     * The key that will be used to remember the referer in the cookie.
      */
-    'session_key' => 'referer',
+    'referer_cookie_key' => 'user-referer',
+    
+    /*
+     * The key that will be used to remember the utm tags in the cookie.
+     */
+    'utm_cookie_key' => 'user-utms',
 
     /*
-     * The sources used to determine the referer.
+     * The sources used to determine the referer/utms.
      */
     'sources' => [
-        Spatie\Referer\Sources\UtmSource::class,
-        Spatie\Referer\Sources\RequestHeader::class,
+        Abhij89\UTMReferer\Sources\UTMSource::class,
+        Abhij89\UTMReferer\Sources\RequestHeader::class,
     ],
 ];
 ```
 
 ## Usage
 
-To capture the referer, all you need to do is add the `Spatie\Referer\CaptureReferer` middleware to your middleware stack. In most configuration's, you'll only want to capture the referer in "web" requests, so it makes sense to register it in the `web` stack. Make sure it comes **after** Laravel's `StartSession` middleware!
+To capture the referer, all you need to do is add the `Abhij89\UTMReferer\CaptureReferer` middleware to your middleware stack. In most configuration's, you'll only want to capture the referer in "web" requests, so it makes sense to register it in the `web` stack. Make sure it comes **after** Laravel's `StartSession` middleware!
 
 ```php
 // app/Http/Kernel.php
@@ -54,7 +59,7 @@ protected $middlewareGroups = [
         // ...
         \Illuminate\Session\Middleware\StartSession::class,
         // ...
-        \Spatie\Referer\CaptureReferer::class,
+        \Abhij89\UTMReferer\CaptureReferer::class,
         // ...
     ],
     // ...
@@ -64,24 +69,18 @@ protected $middlewareGroups = [
 The easiest way to retrieve the referer is by just resolving it out of the container:
 
 ```php
-use Spatie\Referer\Referer;
+use Abhij89\UTMReferer\UTMReferer;
 
-$referer = app(Referer::class)->get(); // 'google.com'
+$referer = app(UTMReferer::class)->get(); // 'google.com'
 ```
 
 Or you could opt to use Laravel's automatic facades:
 
 ```php
-use Facades\Spatie\Referer\Referer;
+use Facades\Abhij89\UTMReferer\UTMReferer;
 
-$referer = Referer::get(); // 'google.com'
+$referer = UTMReferer::get(); // 'google.com'
 ```
-
-The captured referer is (from high to low priority):
-
-- The `utm_source` query parameter, or:
-- The domain from the request's `Referer` header if there's an external host in the URL, or:
-- Empty
 
 An empty referer will never overwrite an exisiting referer. So if a visitor comes from google.com and visits a few pages on your site, those pages won't affect the referer since local hosts are ignored.
 
@@ -106,8 +105,8 @@ The referer is determined by doing checks on various sources, which are defined 
 return [
     // ...
     'sources' => [
-        Spatie\Referer\Sources\UtmSource::class,
-        Spatie\Referer\Sources\RequestHeader::class,
+        Abhij89\Referer\Sources\UtmSource::class,
+        Abhij89\Referer\Sources\RequestHeader::class,
     ],
 ];
 ```
@@ -122,7 +121,7 @@ First, create the source implementations:
 namespace App\Referer;
 
 use Illuminate\Http\Request;
-use Spatie\Referer\Source;
+use Abhij89\Referer\Source;
 
 class RefParameter implements Source
 {
@@ -140,7 +139,7 @@ return [
     // ...
     'sources' => [
         App\Referer\RefParameter::class,
-        Spatie\Referer\Sources\RequestHeader::class,
+        Abhij89\Referer\Sources\RequestHeader::class,
     ],
 ];
 ```
